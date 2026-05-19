@@ -1,0 +1,745 @@
+basePath: /api/v1
+definitions:
+  auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+      password:
+        maxLength: 100
+        minLength: 6
+        type: string
+      phone:
+        maxLength: 15
+        minLength: 10
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - phone
+    type: object
+  booking.BookingStatus:
+    enum:
+    - MENUNGGU
+    - DIKONFIRMASI
+    - SELESAI
+    - DIBATALKAN
+    type: string
+    x-enum-varnames:
+    - StatusMenunggu
+    - StatusDikonfirmasi
+    - StatusSelesai
+    - StatusDibatalkan
+  booking.CreateRequest:
+    properties:
+      catatan:
+        type: string
+      jumlah_peserta:
+        minimum: 1
+        type: integer
+      kontak:
+        maxLength: 120
+        minLength: 3
+        type: string
+      nama_pemesan:
+        maxLength: 120
+        minLength: 3
+        type: string
+      paket_id:
+        type: string
+    required:
+    - jumlah_peserta
+    - kontak
+    - nama_pemesan
+    - paket_id
+    type: object
+  booking.UpdateRequest:
+    properties:
+      catatan:
+        type: string
+      jumlah_peserta:
+        minimum: 1
+        type: integer
+      kontak:
+        maxLength: 120
+        minLength: 3
+        type: string
+      nama_pemesan:
+        maxLength: 120
+        minLength: 3
+        type: string
+      paket_id:
+        type: string
+    required:
+    - jumlah_peserta
+    - kontak
+    - nama_pemesan
+    - paket_id
+    type: object
+  booking.UpdateStatusRequest:
+    properties:
+      status:
+        $ref: '#/definitions/booking.BookingStatus'
+    required:
+    - status
+    type: object
+  helper.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
+  helper.SuccessResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
+  paket.CreatePaketRequest:
+    properties:
+      deskripsi:
+        type: string
+      harga:
+        minimum: 0
+        type: integer
+      kuota_total:
+        minimum: 1
+        type: integer
+      nama_paket:
+        maxLength: 150
+        minLength: 3
+        type: string
+      tanggal_berangkat:
+        type: string
+    required:
+    - harga
+    - kuota_total
+    - nama_paket
+    - tanggal_berangkat
+    type: object
+  paket.UpdatePaketRequest:
+    properties:
+      deskripsi:
+        type: string
+      harga:
+        minimum: 0
+        type: integer
+      is_active:
+        type: boolean
+      kuota_total:
+        minimum: 1
+        type: integer
+      nama_paket:
+        maxLength: 150
+        minLength: 3
+        type: string
+      tanggal_berangkat:
+        type: string
+    required:
+    - harga
+    - kuota_total
+    - nama_paket
+    - tanggal_berangkat
+    type: object
+  user.ChangePasswordRequest:
+    properties:
+      new_password:
+        maxLength: 100
+        minLength: 6
+        type: string
+      old_password:
+        minLength: 6
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  user.UpdateProfileRequest:
+    properties:
+      email:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+      phone:
+        maxLength: 15
+        minLength: 10
+        type: string
+    required:
+    - email
+    - name
+    - phone
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: TravelKu
+  description: REST API for TravelKu backend (Auth & Users).
+  title: TravelKu Backend API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and generate JWT token
+      parameters:
+      - description: Login payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Login
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: Register payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Register user
+      tags:
+      - Auth
+  /bookings:
+    get:
+      description: Lihat daftar booking (terbaru di atas) dengan filter optional
+      parameters:
+      - description: MENUNGGU|DIKONFIRMASI|SELESAI|DIBATALKAN
+        in: query
+        name: status
+        type: string
+      - description: Nama paket
+        in: query
+        name: paket_wisata
+        type: string
+      - description: YYYY-MM-DD
+        in: query
+        name: date_from
+        type: string
+      - description: YYYY-MM-DD
+        in: query
+        name: date_to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: List bookings
+      tags:
+      - Bookings
+    post:
+      consumes:
+      - application/json
+      description: Tambah pemesanan baru (status otomatis MENUNGGU)
+      parameters:
+      - description: Booking payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/booking.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Tambah booking
+      tags:
+      - Bookings
+  /bookings/{id}:
+    delete:
+      description: Hapus pemesanan yang ada (tidak bisa jika status final)
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Hapus booking
+      tags:
+      - Bookings
+    put:
+      consumes:
+      - application/json
+      description: Edit pemesanan yang ada (tidak termasuk ubah status)
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Booking update payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/booking.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Edit booking
+      tags:
+      - Bookings
+  /bookings/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: 'Ubah status mengikuti alur: MENUNGGU→(DIKONFIRMASI|DIBATALKAN),
+        DIKONFIRMASI→(SELESAI|DIBATALKAN)'
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Status payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/booking.UpdateStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Ubah status booking
+      tags:
+      - Bookings
+  /bookings/summary:
+    get:
+      description: Jumlah booking & total estimasi pendapatan (status DIKONFIRMASI+SELESAI),
+        mengikuti filter aktif
+      parameters:
+      - description: MENUNGGU|DIKONFIRMASI|SELESAI|DIBATALKAN
+        in: query
+        name: status
+        type: string
+      - description: Nama paket
+        in: query
+        name: paket_wisata
+        type: string
+      - description: YYYY-MM-DD
+        in: query
+        name: date_from
+        type: string
+      - description: YYYY-MM-DD
+        in: query
+        name: date_to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Ringkasan booking
+      tags:
+      - Bookings
+  /pakets:
+    get:
+      description: Ambil daftar paket wisata, bisa difilter hanya yang aktif
+      parameters:
+      - description: Filter hanya paket aktif (true/false)
+        in: query
+        name: active_only
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: List paket wisata
+      tags:
+      - Pakets
+    post:
+      consumes:
+      - application/json
+      description: Buat paket wisata baru dengan kuota dan harga
+      parameters:
+      - description: Payload pembuatan paket
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/paket.CreatePaketRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Tambah paket wisata
+      tags:
+      - Pakets
+  /pakets/{id}:
+    delete:
+      description: Hapus paket wisata berdasarkan ID
+      parameters:
+      - description: Paket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Hapus paket wisata
+      tags:
+      - Pakets
+    get:
+      description: Ambil data detail paket wisata berdasarkan ID
+      parameters:
+      - description: Paket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Detail paket wisata
+      tags:
+      - Pakets
+    put:
+      consumes:
+      - application/json
+      description: Perbarui informasi paket wisata yang ada
+      parameters:
+      - description: Paket ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Payload pembaruan paket
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/paket.UpdatePaketRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Edit paket wisata
+      tags:
+      - Pakets
+  /users:
+    get:
+      description: Retrieve all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: List users
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      description: Delete user by id
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete user
+      tags:
+      - Users
+    get:
+      description: Retrieve a user by id
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      summary: Get user by ID
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update name, email, and phone
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update profile payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - Users
+  /users/{id}/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Change user's password
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Change password payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Change password
+      tags:
+      - Users
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    description: 'Use: Bearer <token>'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
