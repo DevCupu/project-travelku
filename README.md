@@ -6,7 +6,7 @@ Proyek ini dibuat untuk menjawab kebutuhan modul booking secara menyeluruh—mul
 
 ---
 
-## 🚀 Cara Nge-run Project di Komputer Kamu
+## 🚀 Cara Nge-run Project
 
 Aplikasi ini menggunakan struktur monorepo biar rapi, memisahkan folder `backend` (Go) dan `frontend` (Vue.js + Vite). Sebelum mulai, pastikan komputer kamu sudah terpasang **Go (1.20+)**, **Node.js (18+)**, dan **PostgreSQL** ya!
 
@@ -56,13 +56,14 @@ Aplikasi ini menggunakan struktur monorepo biar rapi, memisahkan folder `backend
 * **Vue 3 (Composition API) & Vite**: Kombinasi maut buat bikin web super kencang, *hot-reload* instan, dan struktur kodenya gampang banget dipahami.
 * **Vue Router**: Mengatur perpindahan halaman secara mulus (*Single Page Application*) dan dilengkapi proteksi halaman (Route Guard) biar halaman admin nggak bisa diintip sebelum login.
 * **Axios**: Library andalan buat kirim-terima data dari API backend.
-* **Vanilla CSS (Desain Eksklusif)**: Kita sengaja bikin CSS manual tanpa framework instan (seperti Tailwind) biar tampilannya berkarakter, eksklusif, responsif, dan bebas dari *bloatware* CSS yang berat.
+* **Tailwind CSS**: Utility-first CSS framework yang memudahkan pengembangan UI yang responsif dan konsisten.
 
 ### Sisi Backend (Logika & Data)
-* **Golang (Go)**: Terkenal sangat cepat, hemat memori, dan handal banget pas menangani banyak transaksi booking secara bersamaan.
+* **Golang (Go)**: Karena Terkenal sangat cepat, hemat memori, dan handal banget pas menangani banyak transaksi booking secara bersamaan jadi saya rasa go cocok untuk stack ini untuk kedepannya juga.
+saya pribadi sedang mendalami bahasa pemrograman Go jadi pade case ini saya pilih go sebagai backend .
 * **Gin Framework**: Router HTTP paling ngebut di ekosistem Go, bikin API kita responsif banget.
 * **GORM**: ORM paling populer buat Go, ngebantu kita migrasi tabel otomatis dan bikin query pencarian/filter jadi simpel banget tanpa ribet nulis SQL manual.
-* **PostgreSQL**: Database tangguh standar industri untuk menjamin data transaksi tersimpan aman tanpa duplikasi (*ACID compliant*).
+* **PostgreSQL**: Database tangguh standar industri untuk menjamin data transaksi tersimpan aman tanpa duplikasi (*ACID compliant*), sehingga saya rasa postgre cocok untuk stack ini, di banding mysql atau mariadb.
 * **Swaggo (Swagger)**: Bikin dokumentasi API otomatis dari komentar kode, biar tim frontend atau reviewer bisa nyobain API-nya langsung tanpa repot pasang Postman.
 
 ---
