@@ -1,6 +1,6 @@
 package auth
 
-import userfeature "backend-travelku/internal/user"
+import "backend-travelku/internal/user"
 
 // ============================================================
 // AUTH REQUEST DTOs
@@ -23,8 +23,8 @@ type LoginRequest struct {
 // ============================================================
 
 type LoginResponse struct {
-	Token     string                   `json:"token"`
-	ExpiresIn int                      `json:"expires_in"`
-	TokenType string                   `json:"token_type"`
-	User      userfeature.UserResponse `json:"user"`
+	Token     string            `json:"token"`
+	ExpiresIn int               `json:"expires_in"`
+	TokenType string            `json:"token_type"`
+	User      user.UserResponse `json:"user"`
 }

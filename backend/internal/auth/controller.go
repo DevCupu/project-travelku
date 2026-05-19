@@ -26,7 +26,7 @@ func NewController(service Service) *Controller {
 // @Accept      json
 // @Produce     json
 // @Param       request body     RegisterRequest true "Register payload"
-// @Success     201     {object} helper.SuccessResponse
+// @Success     201     {object} helper.SuccessResponse{data=user.UserResponse}
 // @Failure     400     {object} helper.ErrorResponse
 // @Router      /auth/register [post]
 func (h *Controller) Register(c *gin.Context) {
@@ -55,7 +55,7 @@ func (h *Controller) Register(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       request body     LoginRequest true "Login payload"
-// @Success     200     {object} helper.SuccessResponse
+// @Success     200     {object} helper.SuccessResponse{data=auth.LoginResponse}
 // @Failure     400     {object} helper.ErrorResponse
 // @Failure     401     {object} helper.ErrorResponse
 // @Router      /auth/login [post]

@@ -24,6 +24,7 @@ func NewController(service Service) *Controller {
 // @Tags        Bookings
 // @Accept      json
 // @Produce     json
+// @Security    BearerAuth
 // @Param       request body     CreateRequest true "Booking payload"
 // @Success     201     {object} helper.SuccessResponse
 // @Failure     400     {object} helper.ErrorResponse
@@ -51,6 +52,7 @@ func (h *Controller) CreateBooking(c *gin.Context) {
 // @Description Lihat daftar booking (terbaru di atas) dengan filter dan pagenasi optional
 // @Tags        Bookings
 // @Produce     json
+// @Security    BearerAuth
 // @Param       status       query    string false "MENUNGGU|DIKONFIRMASI|SELESAI|DIBATALKAN"
 // @Param       paket_wisata query    string false "Nama paket"
 // @Param       date_from    query    string false "YYYY-MM-DD"
@@ -86,6 +88,7 @@ func (h *Controller) ListBookings(c *gin.Context) {
 // @Tags        Bookings
 // @Accept      json
 // @Produce     json
+// @Security    BearerAuth
 // @Param       id      path     string        true "Booking ID"
 // @Param       request body     UpdateRequest true "Booking update payload"
 // @Success     200 {object} helper.SuccessResponse
@@ -121,6 +124,7 @@ func (h *Controller) UpdateBooking(c *gin.Context) {
 // @Description Hapus pemesanan yang ada (tidak bisa jika status final)
 // @Tags        Bookings
 // @Produce     json
+// @Security    BearerAuth
 // @Param       id path     string true "Booking ID"
 // @Success     200 {object} helper.SuccessResponse
 // @Failure     400 {object} helper.ErrorResponse
@@ -148,6 +152,7 @@ func (h *Controller) DeleteBooking(c *gin.Context) {
 // @Tags        Bookings
 // @Accept      json
 // @Produce     json
+// @Security    BearerAuth
 // @Param       id      path     string              true "Booking ID"
 // @Param       request body     UpdateStatusRequest true "Status payload"
 // @Success     200 {object} helper.SuccessResponse
@@ -183,6 +188,7 @@ func (h *Controller) UpdateBookingStatus(c *gin.Context) {
 // @Description Jumlah booking & total estimasi pendapatan (status DIKONFIRMASI+SELESAI), mengikuti filter aktif
 // @Tags        Bookings
 // @Produce     json
+// @Security    BearerAuth
 // @Param       status       query    string false "MENUNGGU|DIKONFIRMASI|SELESAI|DIBATALKAN"
 // @Param       paket_wisata query    string false "Nama paket"
 // @Param       date_from    query    string false "YYYY-MM-DD"

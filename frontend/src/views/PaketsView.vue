@@ -108,15 +108,40 @@ const handleSubmit = async () => {
   }
 }
 
-const handleDelete = async (id) => {
-  if (!confirm('Hapus paket wisata ini? Pastikan belum ada peserta yang terdaftar.')) return
-  try {
-    await deletePaket(id)
-    showToast('Paket wisata berhasil dihapus!', 'success')
-    fetchPakets(false)
-  } catch (err) {
-    showToast(err.response?.data?.message || 'Gagal menghapus paket wisata', 'error')
+// State for Custom Confirmation Modal
+const showConfirmModal = ref(false)
+const confirmCallback = ref(null)
+const confirmMessage = ref('')
+const confirmTitle = ref('')
+
+const openConfirm = (title, message, callback) => {
+  confirmTitle.value = title
+  confirmMessage.value = message
+  confirmCallback.value = callback
+  showConfirmModal.value = true
+}
+
+const handleConfirmAction = async () => {
+  showConfirmModal.value = false
+  if (confirmCallback.value) {
+    await confirmCallback.value()
   }
+}
+
+const handleDelete = (id) => {
+  openConfirm(
+    'Hapus Paket Wisata?',
+    'Apakah Anda yakin ingin menghapus paket wisata ini? Tindakan ini bersifat permanen dan hanya bisa dilakukan jika belum ada jemaah yang melakukan booking pada paket ini.',
+    async () => {
+      try {
+        await deletePaket(id)
+        showToast('Paket wisata berhasil dihapus!', 'success')
+        fetchPakets(false)
+      } catch (err) {
+        showToast(err.response?.data?.message || 'Gagal menghapus paket wisata', 'error')
+      }
+    }
+  )
 }
 
 const formatCurrency = (amt) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amt)
@@ -297,6 +322,46 @@ const formatDate = (dateStr) => {
 
       <!-- Mobile Bottom Navbar -->
       <BottomNavbar class="md:hidden" />
+      <!-- Beautiful Custom Confirmation Modal -->
+      <Transition name="confirm-modal">
+        <div v-if="showConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <!-- Backdrop -->
+          <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-fade-in" @click="showConfirmModal = false"></div>
+          
+          <!-- Modal Card -->
+          <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-md w-full overflow-hidden transform transition-all z-10 scale-100">
+            <div class="p-6">
+              <!-- Icon and Header -->
+              <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-red-50 text-red-600">
+                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-[17px] font-bold text-gray-900">{{ confirmTitle }}</h3>
+                  <p class="text-[10px] text-red-500 uppercase tracking-wider font-bold mt-0.5">Konfirmasi Penghapusan</p>
+                </div>
+              </div>
+              
+              <!-- Message -->
+              <p class="text-sm text-gray-600 leading-relaxed">{{ confirmMessage }}</p>
+            </div>
+            
+            <!-- Actions Footer -->
+            <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100">
+              <button @click="showConfirmModal = false" 
+                      class="h-10 px-4 text-sm font-semibold text-gray-600 hover:text-gray-800 bg-white hover:bg-slate-100 rounded-lg border border-gray-200 transition cursor-pointer">
+                Batal
+              </button>
+              <button @click="handleConfirmAction" 
+                      class="h-10 px-5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg transition cursor-pointer">
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
     </div>
   </div>
 </template>
@@ -310,6 +375,16 @@ const formatDate = (dateStr) => {
 .toast-enter-from,
 .toast-leave-to {
   transform: translateY(-20px) scale(0.95);
+  opacity: 0;
+}
+
+/* Custom Confirm Modal Transition */
+.confirm-modal-enter-active,
+.confirm-modal-leave-active {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.confirm-modal-enter-from,
+.confirm-modal-leave-to {
   opacity: 0;
 }
 

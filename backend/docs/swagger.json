@@ -42,7 +42,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/helper.SuccessResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/auth.LoginResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -88,7 +100,19 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/helper.SuccessResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/user.UserResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -102,7 +126,12 @@
         },
         "/bookings": {
             "get": {
-                "description": "Lihat daftar booking (terbaru di atas) dengan filter optional",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Lihat daftar booking (terbaru di atas) dengan filter dan pagenasi optional",
                 "produces": [
                     "application/json"
                 ],
@@ -134,6 +163,18 @@
                         "description": "YYYY-MM-DD",
                         "name": "date_to",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Nomor halaman (default 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Jumlah data per halaman (default 10)",
+                        "name": "limit",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -158,6 +199,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Tambah pemesanan baru (status otomatis MENUNGGU)",
                 "consumes": [
                     "application/json"
@@ -204,6 +250,11 @@
         },
         "/bookings/summary": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Jumlah booking \u0026 total estimasi pendapatan (status DIKONFIRMASI+SELESAI), mengikuti filter aktif",
                 "produces": [
                     "application/json"
@@ -262,6 +313,11 @@
         },
         "/bookings/{id}": {
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Edit pemesanan yang ada (tidak termasuk ubah status)",
                 "consumes": [
                     "application/json"
@@ -319,6 +375,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Hapus pemesanan yang ada (tidak bisa jika status final)",
                 "produces": [
                     "application/json"
@@ -366,6 +427,11 @@
         },
         "/bookings/{id}/status": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Ubah status mengikuti alur: MENUNGGU→(DIKONFIRMASI|DIBATALKAN), DIKONFIRMASI→(SELESAI|DIBATALKAN)",
                 "consumes": [
                     "application/json"
@@ -625,6 +691,11 @@
         },
         "/users": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve all users",
                 "produces": [
                     "application/json"
@@ -651,6 +722,11 @@
         },
         "/users/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a user by id",
                 "produces": [
                     "application/json"
@@ -838,6 +914,23 @@
                 },
                 "password": {
                     "type": "string"
+                }
+            }
+        },
+        "auth.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "expires_in": {
+                    "type": "integer"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "token_type": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/user.UserResponse"
                 }
             }
         },
@@ -1097,6 +1190,35 @@
                     "type": "string",
                     "maxLength": 15,
                     "minLength": 10
+                }
+            }
+        },
+        "user.UserResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "last_login": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         }

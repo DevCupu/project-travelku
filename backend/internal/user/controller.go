@@ -23,6 +23,7 @@ func NewController(service Service) *Controller {
 // @Description Retrieve a user by id
 // @Tags        Users
 // @Produce     json
+// @Security    BearerAuth
 // @Param       id path     string true "User ID"
 // @Success     200 {object} helper.SuccessResponse
 // @Failure     404 {object} helper.ErrorResponse
@@ -46,6 +47,7 @@ func (h *Controller) GetUser(c *gin.Context) {
 // @Description Retrieve all users
 // @Tags        Users
 // @Produce     json
+// @Security    BearerAuth
 // @Success     200 {object} helper.SuccessResponse
 // @Failure     500 {object} helper.ErrorResponse
 // @Router      /users [get]

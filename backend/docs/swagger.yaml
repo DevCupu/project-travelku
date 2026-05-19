@@ -10,6 +10,17 @@ definitions:
     - email
     - password
     type: object
+  auth.LoginResponse:
+    properties:
+      expires_in:
+        type: integer
+      token:
+        type: string
+      token_type:
+        type: string
+      user:
+        $ref: '#/definitions/user.UserResponse'
+    type: object
   auth.RegisterRequest:
     properties:
       email:
@@ -198,6 +209,25 @@ definitions:
     - name
     - phone
     type: object
+  user.UserResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      last_login:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      updated_at:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -224,7 +254,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/helper.SuccessResponse'
+            allOf:
+            - $ref: '#/definitions/helper.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth.LoginResponse'
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -254,7 +289,12 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/helper.SuccessResponse'
+            allOf:
+            - $ref: '#/definitions/helper.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.UserResponse'
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -264,7 +304,8 @@ paths:
       - Auth
   /bookings:
     get:
-      description: Lihat daftar booking (terbaru di atas) dengan filter optional
+      description: Lihat daftar booking (terbaru di atas) dengan filter dan pagenasi
+        optional
       parameters:
       - description: MENUNGGU|DIKONFIRMASI|SELESAI|DIBATALKAN
         in: query
@@ -282,6 +323,14 @@ paths:
         in: query
         name: date_to
         type: string
+      - description: Nomor halaman (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Jumlah data per halaman (default 10)
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
@@ -297,6 +346,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: List bookings
       tags:
       - Bookings
@@ -326,6 +377,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Tambah booking
       tags:
       - Bookings
@@ -357,6 +410,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Hapus booking
       tags:
       - Bookings
@@ -395,6 +450,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Edit booking
       tags:
       - Bookings
@@ -435,6 +492,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Ubah status booking
       tags:
       - Bookings
@@ -474,6 +533,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Ringkasan booking
       tags:
       - Bookings
@@ -619,6 +680,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: List users
       tags:
       - Users
@@ -666,6 +729,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/helper.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get user by ID
       tags:
       - Users

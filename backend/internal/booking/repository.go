@@ -1,6 +1,7 @@
 package booking
 
 import (
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -93,7 +94,7 @@ func applyFilter(q *gorm.DB, filter Filter) *gorm.DB {
 		q = q.Where("status = ?", *filter.Status)
 	}
 	if filter.Paket != nil && *filter.Paket != "" {
-		q = q.Where("paket_wisata = ?", *filter.Paket)
+		q = q.Where("LOWER(paket_wisata) LIKE ?", "%"+strings.ToLower(*filter.Paket)+"%")
 	}
 	if filter.DateFrom != nil {
 		q = q.Where("tanggal_berangkat >= ?", *filter.DateFrom)
