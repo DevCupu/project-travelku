@@ -1,10 +1,14 @@
 package booking
 
-import "github.com/gin-gonic/gin"
+import (
+	"backend-travelku/internal/middleware"
+	"github.com/gin-gonic/gin"
+)
 
 // RegisterRoutes mendaftarkan semua route untuk fitur booking.
 func RegisterRoutes(router *gin.Engine, controller *Controller) {
 	bookings := router.Group("/api/v1/bookings")
+	bookings.Use(middleware.AuthMiddleware())
 	{
 		bookings.POST("", controller.CreateBooking)
 		bookings.GET("", controller.ListBookings)

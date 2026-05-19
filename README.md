@@ -60,7 +60,7 @@ Aplikasi ini menggunakan struktur monorepo biar rapi, memisahkan folder `backend
 
 ### Sisi Backend (Logika & Data)
 * **Golang (Go)**: Karena Terkenal sangat cepat, hemat memori, dan handal banget pas menangani banyak transaksi booking secara bersamaan jadi saya rasa go cocok untuk stack ini untuk kedepannya juga.
-saya pribadi sedang mendalami bahasa pemrograman Go jadi pade case ini saya pilih go sebagai backend .
+saya pribadi sedang mendalami bahasa pemrograman Go jadi pada case ini saya pilih go sebagai backend .
 * **Gin Framework**: Router HTTP paling ngebut di ekosistem Go, bikin API kita responsif banget.
 * **GORM**: ORM paling populer buat Go, ngebantu kita migrasi tabel otomatis dan bikin query pencarian/filter jadi simpel banget tanpa ribet nulis SQL manual.
 * **PostgreSQL**: Database tangguh standar industri untuk menjamin data transaksi tersimpan aman tanpa duplikasi (*ACID compliant*), sehingga saya rasa postgre cocok untuk stack ini, di banding mysql atau mariadb.
@@ -91,54 +91,62 @@ saya pribadi sedang mendalami bahasa pemrograman Go jadi pade case ini saya pili
 
 ---
 
-## 📊 Rancangan Database (ERD)
+## 📊 Rancangan Database (ERD Schema)
 
-Tabel `pakets` dan `bookings` terhubung dengan relasi satu-ke-banyak (*One-to-Many*). Setiap kali ada booking baru, sistem bakal memverifikasi kuota di tabel `pakets` dan mengikat `paket_id`.
+Database TravelKu dirancang menggunakan **PostgreSQL** dengan relasi terstruktur. Berikut adalah representasi skema tabel database lengkap yang mudah dibaca:
 
-```mermaid
-erDiagram
-    users {
-        string id PK
-        string name
-        string email "UNIQUE"
-        string phone
-        string password
-        boolean is_active
-        datetime last_login
-        datetime created_at
-        datetime updated_at
-    }
+### 1. Tabel `users` (Staf / Admin)
+| Kolom (Field) | Tipe Data | Atribut / Constraint | Penjelasan |
+| :--- | :--- | :--- | :--- |
+| **`id`** | `VARCHAR(100)` | `PRIMARY KEY` | ID unik akun staf (UUID) |
+| `name` | `VARCHAR(120)` | `NOT NULL` | Nama lengkap staf / admin |
+| `email` | `VARCHAR(120)` | `UNIQUE`, `NOT NULL` | Email login (kredensial unik) |
+| `phone` | `VARCHAR(30)` | `NULL` | Nomor kontak telepon staf |
+| `password` | `VARCHAR(255)` | `NOT NULL` | Hash password keamanan (bcrypt) |
+| `is_active` | `BOOLEAN` | `DEFAULT true` | Status keaktifan akun staf |
+| `last_login` | `TIMESTAMP` | `NULL` | Waktu login terakhir staf |
+| `created_at` | `TIMESTAMP` | `NOT NULL` | Waktu pembuatan data |
+| `updated_at` | `TIMESTAMP` | `NOT NULL` | Waktu perubahan data |
 
-    pakets {
-        string id PK
-        string nama_paket
-        text deskripsi
-        bigint harga
-        int kuota_total
-        int sisa_kuota
-        date tanggal_berangkat
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-    }
+### 2. Tabel `pakets` (Katalog Paket Wisata)
+| Kolom (Field) | Tipe Data | Atribut / Constraint | Penjelasan |
+| :--- | :--- | :--- | :--- |
+| **`id`** | `VARCHAR(100)` | `PRIMARY KEY` | ID unik paket destinasi (UUID) |
+| `nama_paket` | `VARCHAR(120)` | `NOT NULL` | Nama paket (misal: Bali 4D3N) |
+| `deskripsi` | `TEXT` | `NULL` | Informasi detail rencana perjalanan |
+| `harga` | `BIGINT` | `NOT NULL` | Harga dasar paket wisata per orang |
+| `kuota_total` | `INT` | `NOT NULL` | Kuota kapasitas maksimal jemaah |
+| `sisa_kuota` | `INT` | `NOT NULL` | Sisa kapasitas yang tersedia |
+| `tanggal_berangkat` | `DATE` | `NOT NULL` | Tanggal keberangkatan paket |
+| `is_active` | `BOOLEAN` | `DEFAULT true` | Status keaktifan pemesanan paket |
+| `created_at` | `TIMESTAMP` | `NOT NULL` | Waktu pembuatan data |
+| `updated_at` | `TIMESTAMP` | `NOT NULL` | Waktu perubahan data |
 
-    bookings {
-        string id PK
-        string nama_pemesan
-        string kontak
-        string paket_id FK "Relasi ke pakets.id"
-        string paket_wisata "Denormalisasi nama paket"
-        date tanggal_berangkat
-        int jumlah_peserta
-        bigint harga_per_orang
-        string status "MENUNGGU, DIKONFIRMASI, SELESAI, DIBATALKAN"
-        text catatan
-        datetime created_at
-        datetime updated_at
-    }
+### 3. Tabel `bookings` (Transaksi Pemesanan)
+| Kolom (Field) | Tipe Data | Atribut / Constraint | Penjelasan |
+| :--- | :--- | :--- | :--- |
+| **`id`** | `VARCHAR(100)` | `PRIMARY KEY` | ID unik kode transaksi booking (UUID) |
+| `nama_pemesan` | `VARCHAR(120)` | `NOT NULL` | Nama lengkap jemaah / pelanggan |
+| `kontak` | `VARCHAR(120)` | `NOT NULL` | Nomor HP atau email jemaah |
+| `paket_id` | `VARCHAR(100)` | `FOREIGN KEY -> pakets.id` | Referensi relasi ke katalog paket wisata |
+| `paket_wisata` | `VARCHAR(120)` | `NOT NULL` | *Denormalisasi:* Nama paket saat transaksi |
+| `tanggal_berangkat` | `DATE` | `NOT NULL` | *Denormalisasi:* Tanggal berangkat saat transaksi |
+| `jumlah_peserta` | `INT` | `NOT NULL` | Jumlah peserta yang didaftarkan |
+| `harga_per_orang` | `BIGINT` | `NOT NULL` | *Denormalisasi:* Harga paket saat transaksi |
+| `status` | `VARCHAR(20)` | `NOT NULL` | Status workflow (`MENUNGGU`, `DIKONFIRMASI`, `SELESAI`, `DIBATALKAN`) |
+| `catatan` | `TEXT` | `NULL` | Catatan opsional dari jemaah |
+| `created_at` | `TIMESTAMP` | `NOT NULL` | Waktu transaksi dibuat |
+| `updated_at` | `TIMESTAMP` | `NOT NULL` | Waktu status transaksi diperbarui |
 
-    pakets ||--o{ bookings : "memiliki"
-```
+### 💡 Penjelasan Alur & Skema Database (ERD):
+
+Rancangan database TravelKu dibuat sangat efisien dan terstruktur menggunakan **3 tabel utama** yang saling terhubung:
+
+| Nama Tabel | Peran & Tujuan Utama | Relasi & Desain Teknis |
+| :--- | :--- | :--- |
+| **`users`** <br>*(Data Staf/Admin)* | Menyimpan data kredensial akun staf (seperti email dan password terenkripsi) untuk keperluan autentikasi login ke dasbor admin. | Berdiri sendiri sebagai entitas administrator keamanan. |
+| **`pakets`** <br>*(Katalog Destinasi)* | Menyimpan detail katalog paket wisata (harga, deskripsi, tanggal berangkat, dan kuota perjalanan). | **One-to-Many (`1:N`) ke `bookings`**.<br>Mencatat `kuota_total` dan `sisa_kuota`. Nilai `sisa_kuota` otomatis berkurang secara transaksional tiap kali ada pemesanan baru yang berhasil dibuat. |
+| **`bookings`** <br>*(Transaksi Pemesanan)* | Mencatat data transaksi pemesanan jemaah/pelanggan lengkap beserta catatan tambahan dan status alur kerja (`MENUNGGU`, `DIKONFIRMASI`, `SELESAI`, `DIBATALKAN`). | **Relasi:** Terikat ke paket lewat FK `paket_id`. <br><br>**Teknik Denormalisasi Sebagian:** Field `paket_wisata` dan `harga_per_orang` disimpan langsung (didenormalisasi) di tabel `bookings`. Tujuannya agar riwayat harga dan destinasi jemaah di masa lalu **tetap terkunci aman (immutable)** dan tidak ikut berubah secara historis jika suatu saat paket wisata aslinya diubah oleh staf lain. |
 
 ---
 
